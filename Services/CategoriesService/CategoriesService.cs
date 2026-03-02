@@ -88,9 +88,43 @@ namespace Prueba2.Services.CategoriesService
         }
         public async Task UpdateCategory(Guid id, CategoryRequestDTO categoryRequest)
         {
+            try
+            {
+                if (string.IsNullOrEmpty(categoryRequest.Name)) throw new Exception("Tiene que definir un nuevo nombre");
+                if (string.IsNullOrEmpty(id.ToString())) throw new Exception("Tienes que definir un ID");
+                var category = await _context.Categories.FindAsync(id);
 
+                if (string.IsNullOrEmpty(category.ToString())) throw new Exception("No se encontró la categoría");
+
+                category.Name = categoryRequest.Name;
+
+                _context.Categories.Update(category);
+                await _context.SaveChangesAsync();
+
+            }
+            catch(Exception ex) 
+            {
+                throw new Exception("Error al actualizar categoria", ex);
+            }
         }
-        Task DeleteCategory(Guid id);
+        public async Task DeleteCategory(Guid id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id.ToString())) throw new Exception("Tienes que definir un ID");
+                var category = await _context.Categories.FindAsync(id);
+                if (string.IsNullOrEmpty(category.ToString())) throw new Exception("No se encontró la categoría");
+
+                category.IsActive = false;
+                _context.Categories.Update(category);
+                await _context.SaveChangesAsync();
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Error al eliminar la categoría", ex);
+            }
+        }
 
     }
 }
