@@ -23,21 +23,24 @@ namespace Prueba2.Services.CategoriesService
             try
             {
 
-                var categories = await _context.Categories.ToListAsync();
-                if (string.IsNullOrEmpty(categories.ToString())) throw new Exception("No se encontraron categorías");
+                var categories = await _context.Categories
+                    .Where(c => c.IsActive)
+                    .ToListAsync();
+                if (categories == null || !categories.Any()) throw new Exception("No se encontraron categorías");
 
                 var response = categories.Select(c => new CategoryResponseDTO
                 {
                     Id = c.Id,
-                    Name = c.Name
-                }).ToList();
+                    Name = c.Name,
+                    IsActive = c.IsActive
+                });
 
-                return response;
+                return response.ToList() ;
             }
             catch (Exception ex)
             {
                 // Manejo de errores, puedes registrar el error o lanzar una excepción personalizada
-                throw new Exception("Error al obtener las categorías", ex);
+                throw new Exception($"Error al obtener las categorías: {ex.Message}", ex);
             }
         }
         public async Task<CategoryResponseDTO> GetCategoryById(Guid id)
@@ -50,7 +53,8 @@ namespace Prueba2.Services.CategoriesService
                 var response = new CategoryResponseDTO
                 {
                     Id = category.Id,
-                    Name = category.Name
+                    Name = category.Name,
+                    IsActive = category.IsActive
                 };
                 return response;
             }
@@ -83,7 +87,7 @@ namespace Prueba2.Services.CategoriesService
             }
             catch(Exception ex)
             {
-                throw new Exception("Error al crear la categoría", ex);
+                throw new Exception($"Error al crear la categoría: {ex.Message}", ex);
             }
         }
         public async Task UpdateCategory(Guid id, CategoryRequestDTO categoryRequest)
@@ -104,7 +108,7 @@ namespace Prueba2.Services.CategoriesService
             }
             catch(Exception ex) 
             {
-                throw new Exception("Error al actualizar categoria", ex);
+                throw new Exception($"Error al actualizar categoria {ex.Message}", ex);
             }
         }
         public async Task DeleteCategory(Guid id)
